@@ -1,0 +1,25 @@
+100 REM Advent of Code 2022, Day 2
+110 WIN$="A YB ZC X": REM Winning combos
+120 LOSE$="A ZB XC Y": REM Losing combos
+130 TIE$="A XB YC Z": REM Draw combos
+140 SCORE$="XYZ"
+150 SCORE=0
+160 INPUT "File";F$
+170 OPEN F$ FOR INPUT AS #1
+180 IF EOF(1) THEN 270
+190 LINE INPUT #1,P$
+200 M$=RIGHT$(P$,1):O$=LEFT$(P$,1)
+210 REM Choose an M$ that will give the desired result
+220 IF M$="X" THEN X$=LOSE$:GOSUB 310:GOTO 250
+230 IF M$="Y" THEN X$=TIE$:GOSUB 310:SCORE=SCORE+3:GOTO 250
+240 IF M$="Z" THEN X$=WIN$:GOSUB 310:SCORE=SCORE+6:GOTO 250
+250 SCORE=SCORE+INSTR(SCORE$,M$)
+260 GOTO 180
+270 REM Finish
+280 CLOSE #1
+290 PRINT "SCORE=";SCORE
+300 END
+310 REM Set M$ to the move that solves O$ in the solution set X$
+320 M$=MID$(X$,INSTR(X$,O$)+2,1)
+330 RETURN
+
