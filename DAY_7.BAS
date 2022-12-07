@@ -68,4 +68,3 @@
 1670  NEXT I%
 1680  PRINT "Smallest = ";MX#
 1690 END
-
