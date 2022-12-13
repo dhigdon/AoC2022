@@ -19,22 +19,19 @@
     ;; Run the rules
     (t (let ((l (first left))
              (r (first right)))
-         (test (cond
+         (test (cond ((and (listp l) (listp r))
+                      (accept l r))
 
-                 ((and (listp l) (listp r))
-                  (accept l r))
+                     ((and (numberp l) (numberp r))
+                      (cond ((= l r) :continue)
+                            ((< l r) :accept)
+                            ((> l r) :reject)))
 
-                 ((and (numberp l) (numberp r))
-                  (cond
-                    ((= l r) :continue)
-                    ((< l r) :accept)
-                    ((> l r) :reject)))
+                     ((and (listp l) (numberp r))
+                      (accept l (list r)))
 
-                 ((and (listp l) (numberp r))
-                  (accept left (cons (list r) (rest right))))
-
-                 ((and (numberp l) (listp r))
-                  (accept (cons (list l) (rest left)) right)))
+                     ((and (numberp l) (listp r))
+                      (accept (list l) r)))
 
                ;; If the cond above continued,
                ;; then we attempt to accept the rest of the data
@@ -46,16 +43,15 @@
 
 (defun part1 (fname)
   "Solves part 1 - count indices of all passing pairs"
-  (let* ((lines (with-open-file (f (pathname fname))
-                  (loop for pair = (list (read f nil :eof)
-                                         (read f nil :eof))
-                        and n upfrom 1
-                        until (eq (first pair) :eof)
-                        collect (list n (apply #'accept pair)))))
-         (result (loop for r in lines
-                       when (eq (second r) :accept)
-                       summing (first r))))
-    result))
+  (let ((lines (with-open-file (f (pathname fname))
+                 (loop for left  = (read f nil :eof)
+                       and right = (read f nil :eof)
+                       and n upfrom 1
+                       until (or (eq left :eof) (eq right :eof))
+                       collect (list n (accept left right))))))
+    (loop for r in lines
+          when (eq (second r) :accept)
+          summing (first r))))
 
 (defun part1a (fname)
   "Solves part 1 - count indices of all passing pairs"
@@ -68,7 +64,6 @@
           until (or (eq left :eof) (eq right :eof))
           when (accept-order left right)
           summing n)))
-
 
 (defparameter *start* '((2)))
 (defparameter *finish* '((6)))
@@ -84,7 +79,7 @@
                         collect code)))
 
          ;; Add the start and finish tags
-         (signal (cons *start* (cons *finish* lines)))
+         (signal (append (list *start* *finish*) lines))
 
          ;; result contains a list of (<index> <line>) lists
          (result (loop for r in (sort signal #'accept-order) 
