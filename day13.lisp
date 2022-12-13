@@ -94,3 +94,17 @@
     ;; We should always find *start* and *finish*!
     (* (first start) (first finish))))
 
+(defun part2a (fname)
+  "Solves part 2. Find product of start and finish marker line numbers."
+  ;; start-pos and finish-pos are the number of data lines
+  ;; that occur before each "tag".
+  ;; start-pos needs +1 to account for its own position
+  ;; finish-pos needs +2 to account for it and *start*
+  (with-open-file (f (pathname fname))
+    (loop for line = (read f nil :eof)
+          until (eq line :eof)
+          counting (accept-order line *start*) into start-pos
+          counting (accept-order line *finish*) into finish-pos
+          finally (return (* (+ 1 start-pos)
+                             (+ 2 finish-pos))))))
+
